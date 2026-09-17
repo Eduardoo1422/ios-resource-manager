@@ -9,16 +9,16 @@ class APIClient {
     
     var token: String? {
         get {
-            guard let data = KeychainHelper.standard.load(key: tokenKey) else { return nil }
+            guard let data = KeychainHelper.shared.load(key: tokenKey) else { return nil }
             return String(data: data, encoding: .utf8)
         }
         set {
             if let token = newValue {
                 if let data = token.data(using: .utf8) {
-                    KeychainHelper.standard.save(key: tokenKey, data: data)
+                    KeychainHelper.shared.save(key: tokenKey, data: data)
                 }
             } else {
-                KeychainHelper.standard.delete(key: tokenKey)
+                KeychainHelper.shared.delete(key: tokenKey)
             }
         }
     }

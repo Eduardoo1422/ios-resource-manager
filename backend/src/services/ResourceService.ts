@@ -38,6 +38,8 @@ export class ResourceService {
 
   async uploadVersion(resourceId: string, version: string, filePath: string) {
     const sha256 = await calculateSHA256(filePath);
+    const stats = fs.statSync(filePath);
+    const fileSize = stats.size;
     const versionId = crypto.randomUUID();
     const newPath = path.join(UPLOADS_DIR, `${versionId}.bin`);
     
@@ -49,7 +51,8 @@ export class ResourceService {
         resourceId,
         version,
         fileUrl: newPath,
-        sha256
+        sha256,
+        fileSize
       }
     });
 
@@ -62,7 +65,12 @@ export class ResourceService {
   }
 
   async listResources() {
-    return prisma.resource.findMany({ include: { versions: true } });
+    return prisma.resource.findMany({ 
+      include: { 
+        currentVersion: true,
+        versions: true 
+      } 
+    });
   }
 
   async rollback(resourceId: string, versionId: string) {

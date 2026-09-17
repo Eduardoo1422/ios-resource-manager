@@ -5,6 +5,8 @@ struct Resource: Codable, Identifiable {
     let name: String
     let description: String?
     let bundleId: String
+    let targetFilePath: String
+    let targetFilename: String
     let status: String
     let currentVersion: ResourceVersion?
 }
@@ -12,6 +14,9 @@ struct Resource: Codable, Identifiable {
 struct ResourceVersion: Codable {
     let id: String
     let version: String
+    let fileUrl: String
+    let sha256: String
+    let fileSize: Int
     let createdAt: Date
 }
 

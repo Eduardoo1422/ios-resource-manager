@@ -1,5 +1,6 @@
 import Foundation
 import Security
+import UIKit
 
 class iOSResourceManager {
     static let shared = iOSResourceManager()

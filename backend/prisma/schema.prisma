@@ -45,6 +45,7 @@ model Resource {
   description      String?
   bundleId         String
   targetFilePath   String
+  targetFilename   String
   status           String            @default("OFFLINE") // ONLINE, MANUTENCAO, OFFLINE
   currentVersionId String?           @unique
   currentVersion   ResourceVersion?  @relation("CurrentVersion", fields: [currentVersionId], references: [id], onDelete: SetNull)
@@ -60,6 +61,7 @@ model ResourceVersion {
   version     String
   fileUrl     String
   sha256      String
+  fileSize    Int       @default(0)
   createdAt   DateTime  @default(now())
   resourceCurrent Resource? @relation("CurrentVersion")
 }

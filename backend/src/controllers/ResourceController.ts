@@ -15,12 +15,13 @@ export class ResourceController {
   }
 
   async create(req: Request, res: Response) {
-    const { name, description, bundleId, targetFilePath, status } = req.body;
+    const { name, description, bundleId, targetFilePath, targetFilename, status } = req.body;
     const resource = await resourceService.createResource({
       name,
       description,
       bundleId,
       targetFilePath,
+      targetFilename,
       status
     });
     res.status(201).json(resource);
