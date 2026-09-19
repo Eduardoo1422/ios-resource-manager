@@ -8,7 +8,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install XcodeGen
+      - name: Install XcodeGen (2.46.0)
         run: brew install xcodegen
 
       - name: Diagnostic Minimal Project Test (2.46.0)
@@ -25,39 +25,41 @@ jobs:
               type: application
               platform: iOS
           EOF
-          xcodegen --spec test-minimal/project.yml --project test-minimal/Project
+          echo "Testing with $(xcodegen --version)"
+          xcodegen --spec test-minimal/project.yml --project test-minimal/Project || echo "2.46.0 failed as expected"
           if [ -d "test-minimal/Project/TestApp.xcodeproj" ]; then
-            echo "Minimal project generation succeeded with 2.46.0"
+            echo "RESULT_2_46_0=PASS" >> $GITHUB_ENV
           else
-            echo "Minimal project generation failed with 2.46.0"
-            exit 1
+            echo "RESULT_2_46_0=FAIL" >> $GITHUB_ENV
           fi
 
       - name: Diagnostic Minimal Project Test (2.45.4)
         run: |
+          # Install 2.45.4 (reproducible approach)
           brew unlink xcodegen
-          brew install xcodegen@2.45.4 || brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/b7b92f4477813a83095368a5c2d33486c478cf84/Formula/x/xcodegen.rb
-          # Note: The above is a best-effort approach to install a specific version if not available directly via brew.
-          # If this fails, we will skip the downgrade test or use a different method.
-          xcodegen --version
+          # XcodeGen formula in homebrew-core does not support @version syntax.
+          # We use a direct download/install approach for the binary.
+          curl -LO https://github.com/yonaskolb/XcodeGen/releases/download/2.45.4/xcodegen.zip
+          unzip xcodegen.zip
+          ./xcodegen --version
+          
           rm -rf test-minimal/Project
-          xcodegen --spec test-minimal/project.yml --project test-minimal/Project
+          ./xcodegen --spec test-minimal/project.yml --project test-minimal/Project
+          
           if [ -d "test-minimal/Project/TestApp.xcodeproj" ]; then
-            echo "Minimal project generation succeeded with 2.45.4"
+            echo "RESULT_2_45_4=PASS" >> $GITHUB_ENV
           else
-            echo "Minimal project generation failed with 2.45.4"
+            echo "RESULT_2_45_4=FAIL" >> $GITHUB_ENV
           fi
 
-      - name: Diagnose XcodeGen
+      - name: Summarize Results
         run: |
-          xcodegen --version
-          which xcodegen
-          xcodegen dump --spec ios-client/project.yml
+          echo "Results:"
+          echo "XcodeGen 2.46.0: $RESULT_2_46_0"
+          echo "XcodeGen 2.45.4: $RESULT_2_45_4"
+          echo "Executable (2.45.4): $(./xcodegen --version)"
+          echo "Path (2.45.4): $(pwd)/xcodegen"
 
-      - name: Generate Project
-        run: |
-          rm -rf ios-client/Project
-          xcodegen generate --spec ios-client/project.yml --project ios-client/Project
 
       - name: Verify Project Generation
         run: |
