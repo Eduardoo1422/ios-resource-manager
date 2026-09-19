@@ -11,26 +11,45 @@ jobs:
       - name: Install XcodeGen (2.46.0)
         run: brew install xcodegen
 
+      - name: Prepare Diagnostic Environment
+        run: |
+          mkdir -p test-minimal
+          cat > test-minimal/project.yml <<'EOF'
+          name: TestApp
+          options:
+            bundleIdPrefix: com.test
+            deploymentTarget:
+              iOS: 17.0
+          targets:
+            TestApp:
+              type: application
+              platform: iOS
+          EOF
+
+          # Prepare 2.45.4
+          curl -LO https://github.com/yonaskolb/XcodeGen/releases/download/2.45.4/xcodegen.zip
+          unzip -o xcodegen.zip
+          chmod +x ./xcodegen/bin/xcodegen
+
       - name: Diagnostic Detailed Checks
         run: |
           echo "--- XcodeGen 2.46.0 Diagnostics ---"
-          xcodegen --version
-          which xcodegen
-          file "$(which xcodegen)"
-          ls -la "$(dirname "$(which xcodegen)")"
-          xcodegen dump --spec test-minimal/project.yml
+          xcodegen --version || echo "2.46.0 version failed"
+          which xcodegen || echo "2.46.0 which failed"
+          file "$(which xcodegen)" || echo "2.46.0 file failed"
+          ls -la "$(dirname "$(which xcodegen)")" || echo "2.46.0 ls failed"
+          xcodegen dump --spec test-minimal/project.yml || echo "2.46.0 dump failed"
 
           echo "--- XcodeGen 2.45.4 Diagnostics ---"
-          ./xcodegen/bin/xcodegen --version
-          file ./xcodegen/bin/xcodegen
-          ls -la ./xcodegen/bin/
+          ./xcodegen/bin/xcodegen --version || echo "2.45.4 version failed"
+          file ./xcodegen/bin/xcodegen || echo "2.45.4 file failed"
+          ls -la ./xcodegen/bin/ || echo "2.45.4 ls failed"
 
       - name: Diagnostic Generation Tests
         run: |
           echo "--- Test 1: No --project flag ---"
           cd test-minimal
           rm -rf Project TestApp.xcodeproj
-          # Note: Minimal project.yml needs to be in current dir for generate to find it
           cp project.yml project_temp.yml
           ../xcodegen/bin/xcodegen --spec project_temp.yml || echo "No --project flag failed"
           [ -d "TestApp.xcodeproj" ] && echo "No --project flag: PASS" || echo "No --project flag: FAIL"
