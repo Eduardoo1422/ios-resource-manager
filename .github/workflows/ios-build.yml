@@ -11,6 +11,12 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
 
+      - name: Diagnose XcodeGen
+        run: |
+          xcodegen --version
+          which xcodegen
+          xcodegen dump --spec ios-client/project.yml
+
       - name: Generate Project
         run: |
           rm -rf ios-client/Project
