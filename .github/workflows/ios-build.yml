@@ -37,14 +37,13 @@ jobs:
         run: |
           # Install 2.45.4 (reproducible approach)
           brew unlink xcodegen
-          # XcodeGen formula in homebrew-core does not support @version syntax.
-          # We use a direct download/install approach for the binary.
           curl -LO https://github.com/yonaskolb/XcodeGen/releases/download/2.45.4/xcodegen.zip
           unzip xcodegen.zip
-          ./xcodegen --version
+          chmod +x ./xcodegen/bin/xcodegen
+          ./xcodegen/bin/xcodegen --version
           
           rm -rf test-minimal/Project
-          ./xcodegen --spec test-minimal/project.yml --project test-minimal/Project
+          ./xcodegen/bin/xcodegen --spec test-minimal/project.yml --project test-minimal/Project
           
           if [ -d "test-minimal/Project/TestApp.xcodeproj" ]; then
             echo "RESULT_2_45_4=PASS" >> $GITHUB_ENV
@@ -57,8 +56,8 @@ jobs:
           echo "Results:"
           echo "XcodeGen 2.46.0: $RESULT_2_46_0"
           echo "XcodeGen 2.45.4: $RESULT_2_45_4"
-          echo "Executable (2.45.4): $(./xcodegen --version)"
-          echo "Path (2.45.4): $(pwd)/xcodegen"
+          echo "Executable (2.45.4): $(./xcodegen/bin/xcodegen --version)"
+          echo "Path (2.45.4): $(pwd)/xcodegen/bin/xcodegen"
 
 
       - name: Verify Project Generation
