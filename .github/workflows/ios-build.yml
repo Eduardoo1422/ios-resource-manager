@@ -12,14 +12,23 @@ jobs:
         run: brew install xcodegen
 
       - name: Generate Project
-        run: cd ios-client && xcodegen generate
+        run: |
+          cd ios-client
+          rm -rf Project
+          xcodegen generate --project Project
 
       - name: Verify Project Generation
         run: |
+          echo "Conteúdo de ios-client/Project:"
+          ls -la ios-client/Project
+
           if [ ! -d "ios-client/Project/iOSResourceManager.xcodeproj" ]; then
-            echo "Project not generated"
+            echo "ERRO: Xcode project não foi gerado."
+            find ios-client -maxdepth 3 -name "*.xcodeproj" -print
             exit 1
           fi
+
+          echo "Xcode project encontrado com sucesso."
 
       - name: List Schemes
         run: xcodebuild -project ios-client/Project/iOSResourceManager.xcodeproj -list
