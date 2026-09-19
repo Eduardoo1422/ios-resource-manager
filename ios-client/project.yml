@@ -1,5 +1,4 @@
 name: iOSResourceManager
-output: Project/
 options:
   bundleIdPrefix: com.yourcompany
   deploymentTarget:
@@ -25,9 +24,9 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.yourcompany.iOSResourceManager
         INFOPLIST_FILE: Resources/Info.plist
     dependencies:
-      - framework: SwiftUI.framework
-      - framework: Foundation.framework
-      - framework: Security.framework
-      - framework: CryptoKit.framework
+      - sdk: SwiftUI.framework
+      - sdk: Foundation.framework
+      - sdk: Security.framework
+      - sdk: CryptoKit.framework
     resources:
       - Resources/Assets.xcassets

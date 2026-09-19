@@ -13,18 +13,18 @@ jobs:
 
       - name: Generate Project
         run: |
-          cd ios-client
-          rm -rf Project
-          xcodegen generate --project Project
+          mkdir -p ios-client/Project
+          cp ios-client/project.yml ios-client/Project/project.yml
+          cd ios-client/Project
+          xcodegen generate
 
       - name: Verify Project Generation
         run: |
-          echo "Conteúdo de ios-client/Project:"
-          ls -la ios-client/Project
-
           if [ ! -d "ios-client/Project/iOSResourceManager.xcodeproj" ]; then
             echo "ERRO: Xcode project não foi gerado."
             find ios-client -maxdepth 3 -name "*.xcodeproj" -print
+            ls -la ios-client
+            ls -la ios-client/Project || true
             exit 1
           fi
 
