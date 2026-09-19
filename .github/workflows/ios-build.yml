@@ -13,10 +13,8 @@ jobs:
 
       - name: Generate Project
         run: |
-          mkdir -p ios-client/Project
-          cp ios-client/project.yml ios-client/Project/project.yml
-          cd ios-client/Project
-          xcodegen generate
+          rm -rf ios-client/Project
+          xcodegen generate --spec ios-client/project.yml --project ios-client/Project
 
       - name: Verify Project Generation
         run: |
