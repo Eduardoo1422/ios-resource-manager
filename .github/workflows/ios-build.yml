@@ -11,53 +11,37 @@ jobs:
       - name: Install XcodeGen (2.46.0)
         run: brew install xcodegen
 
-      - name: Diagnostic Minimal Project Test (2.46.0)
+      - name: Diagnostic Detailed Checks
         run: |
-          mkdir -p test-minimal
-          cat <<EOF > test-minimal/project.yml
-          name: TestApp
-          options:
-            bundleIdPrefix: com.test
-            deploymentTarget:
-              iOS: 17.0
-          targets:
-            TestApp:
-              type: application
-              platform: iOS
-          EOF
-          echo "Testing with $(xcodegen --version)"
-          xcodegen --spec test-minimal/project.yml --project test-minimal/Project || echo "2.46.0 failed as expected"
-          if [ -d "test-minimal/Project/TestApp.xcodeproj" ]; then
-            echo "RESULT_2_46_0=PASS" >> $GITHUB_ENV
-          else
-            echo "RESULT_2_46_0=FAIL" >> $GITHUB_ENV
-          fi
+          echo "--- XcodeGen 2.46.0 Diagnostics ---"
+          xcodegen --version
+          which xcodegen
+          file "$(which xcodegen)"
+          ls -la "$(dirname "$(which xcodegen)")"
+          xcodegen dump --spec test-minimal/project.yml
 
-      - name: Diagnostic Minimal Project Test (2.45.4)
-        run: |
-          # Install 2.45.4 (reproducible approach)
-          brew unlink xcodegen
-          curl -LO https://github.com/yonaskolb/XcodeGen/releases/download/2.45.4/xcodegen.zip
-          unzip xcodegen.zip
-          chmod +x ./xcodegen/bin/xcodegen
+          echo "--- XcodeGen 2.45.4 Diagnostics ---"
           ./xcodegen/bin/xcodegen --version
-          
-          rm -rf test-minimal/Project
-          ./xcodegen/bin/xcodegen --spec test-minimal/project.yml --project test-minimal/Project
-          
-          if [ -d "test-minimal/Project/TestApp.xcodeproj" ]; then
-            echo "RESULT_2_45_4=PASS" >> $GITHUB_ENV
-          else
-            echo "RESULT_2_45_4=FAIL" >> $GITHUB_ENV
-          fi
+          file ./xcodegen/bin/xcodegen
+          ls -la ./xcodegen/bin/
 
-      - name: Summarize Results
+      - name: Diagnostic Generation Tests
         run: |
-          echo "Results:"
-          echo "XcodeGen 2.46.0: $RESULT_2_46_0"
-          echo "XcodeGen 2.45.4: $RESULT_2_45_4"
-          echo "Executable (2.45.4): $(./xcodegen/bin/xcodegen --version)"
-          echo "Path (2.45.4): $(pwd)/xcodegen/bin/xcodegen"
+          echo "--- Test 1: No --project flag ---"
+          cd test-minimal
+          rm -rf Project TestApp.xcodeproj
+          # Note: Minimal project.yml needs to be in current dir for generate to find it
+          cp project.yml project_temp.yml
+          ../xcodegen/bin/xcodegen --spec project_temp.yml || echo "No --project flag failed"
+          [ -d "TestApp.xcodeproj" ] && echo "No --project flag: PASS" || echo "No --project flag: FAIL"
+
+          echo "--- Test 2: With --project flag (existing directory) ---"
+          cd ..
+          rm -rf test-minimal/Project test-minimal/TestApp.xcodeproj
+          mkdir -p test-minimal/Project
+          ./xcodegen/bin/xcodegen --spec test-minimal/project.yml --project test-minimal/Project || echo "With --project flag failed"
+          [ -d "test-minimal/Project/TestApp.xcodeproj" ] && echo "With --project flag: PASS" || echo "With --project flag: FAIL"
+
 
 
       - name: Verify Project Generation
