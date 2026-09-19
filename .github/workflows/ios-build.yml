@@ -1,0 +1,43 @@
+name: iOS Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Project
+        run: cd ios-client && xcodegen generate
+
+      - name: Verify Project Generation
+        run: |
+          if [ ! -d "ios-client/Project/iOSResourceManager.xcodeproj" ]; then
+            echo "Project not generated"
+            exit 1
+          fi
+
+      - name: List Schemes
+        run: xcodebuild -project ios-client/Project/iOSResourceManager.xcodeproj -list
+
+      - name: Build App
+        run: |
+          xcodebuild -project ios-client/Project/iOSResourceManager.xcodeproj \
+                     -scheme iOSResourceManager \
+                     -destination 'generic/platform=iOS' \
+                     -configuration Debug \
+                     -derivedDataPath Build \
+                     CODE_SIGN_IDENTITY="" \
+                     CODE_SIGNING_REQUIRED=NO \
+                     CODE_SIGNING_ALLOWED=NO \
+                     build
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iOSResourceManager-App
+          path: Build/Build/Products/Debug-iphoneos/iOSResourceManager.app

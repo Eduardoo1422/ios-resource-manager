@@ -1,0 +1,33 @@
+name: iOSResourceManager
+output: Project/
+options:
+  bundleIdPrefix: com.yourcompany
+  deploymentTarget:
+    iOS: 17.0
+targets:
+  iOSResourceManager:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+      - path: Core
+      - path: Models
+      - path: Networking
+      - path: Security
+      - path: Services
+      - path: Storage
+      - path: ViewModels
+      - path: Views
+    info:
+      path: Resources/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.yourcompany.iOSResourceManager
+        INFOPLIST_FILE: Resources/Info.plist
+    dependencies:
+      - framework: SwiftUI.framework
+      - framework: Foundation.framework
+      - framework: Security.framework
+      - framework: CryptoKit.framework
+    resources:
+      - Resources/Assets.xcassets
