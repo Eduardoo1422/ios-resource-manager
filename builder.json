@@ -1,0 +1,21 @@
+{
+  "project": "ios-resource-manager",
+  "platform": "ios",
+  "github": {
+    "owner": "Eduardoo1422",
+    "repo": "ios-resource-manager"
+  },
+  "provider": "github",
+  "codemagic": {},
+  "bitrise": {},
+  "ios": {
+    "path": "ios-client",
+    "scheme": "iOSResourceManager"
+  },
+  "flutter": {
+    "watch": {}
+  },
+  "reactNative": {},
+  "kmp": {},
+  "mobai": {}
+}
