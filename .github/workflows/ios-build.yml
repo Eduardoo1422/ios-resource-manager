@@ -45,21 +45,33 @@ jobs:
           file ./xcodegen/bin/xcodegen || echo "2.45.4 file failed"
           ls -la ./xcodegen/bin/ || echo "2.45.4 ls failed"
 
-      - name: Diagnostic Generation Tests
+      - name: Diagnostic Generation Tests (Non-Tolerant)
         run: |
+          set +e
           echo "--- Test 1: No --project flag ---"
           cd test-minimal
           rm -rf Project TestApp.xcodeproj
           cp project.yml project_temp.yml
-          ../xcodegen/bin/xcodegen --spec project_temp.yml || echo "No --project flag failed"
-          [ -d "TestApp.xcodeproj" ] && echo "No --project flag: PASS" || echo "No --project flag: FAIL"
-
-          echo "--- Test 2: With --project flag (existing directory) ---"
+          ../xcodegen/bin/xcodegen generate --spec project_temp.yml
+          STATUS_NO_PROJECT=$?
+          echo "STATUS_NO_PROJECT=$STATUS_NO_PROJECT"
+          file TestApp.xcodeproj 2>&1 || true
+          ls -la TestApp.xcodeproj 2>&1 || true
           cd ..
+
+          echo "--- Test 2: With --project flag ---"
           rm -rf test-minimal/Project test-minimal/TestApp.xcodeproj
           mkdir -p test-minimal/Project
-          ./xcodegen/bin/xcodegen --spec test-minimal/project.yml --project test-minimal/Project || echo "With --project flag failed"
-          [ -d "test-minimal/Project/TestApp.xcodeproj" ] && echo "With --project flag: PASS" || echo "With --project flag: FAIL"
+          ./xcodegen/bin/xcodegen --spec test-minimal/project.yml --project test-minimal/Project
+          STATUS_WITH_PROJECT=$?
+          echo "STATUS_WITH_PROJECT=$STATUS_WITH_PROJECT"
+          file test-minimal/Project/TestApp.xcodeproj 2>&1 || true
+          ls -la test-minimal/Project/TestApp.xcodeproj 2>&1 || true
+          find test-minimal/Project -maxdepth 3 -print 2>&1 || true
+
+          echo "--- Final Tree Check ---"
+          find test-minimal -maxdepth 4 -print 2>&1 || true
+
 
 
 
